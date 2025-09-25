@@ -23,7 +23,7 @@
     border-right: 18px solid transparent;
     border-bottom: 28px solid #e8290f;
     /* top調整為10px使箭頭靠近圓盤 */
-    top: 10px;
+    top: 400px;
     z-index: 10;
   }
   canvas {
@@ -150,7 +150,7 @@ function drawWheel(){
 }
 
 function spin(){
-  const spinDeg = Math.random() * 360 + 360 * 6;
+  const spinDeg = Math.random() * 360 + 360 * 10;
   const spinRad = spinDeg * Math.PI / 180;
   const duration = 4000;
   const start = performance.now();
