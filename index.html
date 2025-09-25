@@ -8,8 +8,9 @@
   body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background: #33cae4;
-    padding: 50px;padding: 50px;background: linear-gradient(135deg,#4b6491,#3d8af7); /* ← 背景漸層 */
+    background: linear-gradient(135deg,#4b6491,#3d8af7);
+    padding: 50px;
+    box-sizing: border-box;
   }
   h1 { margin-bottom: 20px; }
   /* 指針箭頭 */
@@ -17,16 +18,21 @@
     position: relative;
     width: 0;
     height: 0;
-    margin: 0 auto -25px;  /* 負 margin 讓它貼近圓盤 */
+    margin: 0 auto -25px;
     border-left: 18px solid transparent;
     border-right: 18px solid transparent;
-    border-bottom: 28px solid #e8290f; /* 箭頭顏色 */
-    top: 400px;
+    border-bottom: 28px solid #e8290f;
+    /* top調整為10px使箭頭靠近圓盤 */
+    top: 10px;
     z-index: 10;
   }
   canvas {
-    margin: 0 auto 25px;
+    width: 90vw;
+    max-width: 400px;
+    height: auto;
+    aspect-ratio: 1 / 1;
     display: block;
+    margin: 0 auto 25px;
     border: 8px solid #333;
     border-radius: 50%;
   }
@@ -40,6 +46,8 @@
     border-radius: 6px;
     margin-bottom: 20px;
     font-family: Arial, sans-serif;
+    width: 90vw;
+    max-width: 180px;
   }
   ul {
     text-align: left;
@@ -49,6 +57,7 @@
     list-style: none;
     font-family: Arial, sans-serif;
     font-size: 14px;
+    word-break: break-all;
   }
   li {
     margin: 4px 0;
@@ -63,7 +72,7 @@
 <!-- 固定箭頭 -->
 <div id="pointer"></div>
 
-<canvas id="wheel" width="400" height="400"></canvas>
+<canvas id="wheel"></canvas>
 <button onclick="spin()">開始轉！</button>
 
 <h2>全部選項</h2>
@@ -95,10 +104,6 @@
 const tasks = Array.from(document.querySelectorAll('#taskList li')).map(li => li.textContent);
 const canvas = document.getElementById('wheel');
 const ctx = canvas.getContext('2d');
-const size = canvas.width;
-const center = size / 2;
-const slice = 2 * Math.PI / tasks.length;
-let rotation = 0;
 
 function randomColor(i){
   const colors = ['#FF9999','#99CCFF','#99FF99','#FFCC99','#CCCCFF',
@@ -106,13 +111,28 @@ function randomColor(i){
   return colors[i % colors.length];
 }
 
+// 動態調整canvas大小
+function resizeCanvas() {
+  const size = Math.min(window.innerWidth * 0.9, 400);
+  canvas.width = size;
+  canvas.height = size;
+  return size;
+}
+
+let rotation = 0;
+
 function drawWheel(){
-  ctx.clearRect(0,0,size,size);
-  for(let i=0;i<tasks.length;i++){
+  const size = resizeCanvas();
+  const center = size / 2;
+  const slice = 2 * Math.PI / tasks.length;
+
+  ctx.clearRect(0, 0, size, size);
+
+  for(let i=0; i<tasks.length; i++){
     const angle = slice * i + rotation;
     ctx.beginPath();
     ctx.moveTo(center, center);
-    ctx.arc(center, center, center-5, angle, angle + slice);
+    ctx.arc(center, center, center - 0.012 * size, angle, angle + slice);
     ctx.fillStyle = randomColor(i);
     ctx.fill();
     ctx.stroke();
@@ -120,18 +140,18 @@ function drawWheel(){
     // 文字
     ctx.save();
     ctx.translate(center, center);
-    ctx.rotate(angle + slice/2);
+    ctx.rotate(angle + slice / 2);
     ctx.textAlign = "right";
     ctx.fillStyle = "#000";
-    ctx.font = "10px Arial";   // 小一點的 Arial
-    ctx.fillText(tasks[i], center - 10, 4);
+    ctx.font = (size * 0.03) + "px Arial"; // 相對字體大小
+    ctx.fillText(tasks[i], center - size * 0.025, size * 0.01);
     ctx.restore();
   }
 }
 
 function spin(){
-  const spinDeg = Math.random() * 360 + 360*6;
-  const spinRad = spinDeg * Math.PI/180;
+  const spinDeg = Math.random() * 360 + 360 * 6;
+  const spinRad = spinDeg * Math.PI / 180;
   const duration = 4000;
   const start = performance.now();
 
@@ -152,6 +172,8 @@ function spin(){
 }
 
 drawWheel();
+
+window.addEventListener('resize', drawWheel); // 窗口大小改變時重畫
 </script>
 </body>
 </html>
